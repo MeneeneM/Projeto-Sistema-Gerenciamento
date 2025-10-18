@@ -1,0 +1,57 @@
+[
+    {
+        "nome": "Matheus Araujo",
+        "usuario": "matheus",
+        "email": "Matheus.silva@gmail.com",
+        "telefone": "(16) 98111-1111",
+        "data_nascimento": "20/01/2002",
+        "cpf": "123.456.789-10",
+        "cep": "14000-100",
+        "senha": "Matheus123."
+    },
+    {
+        "nome": "Matheus Araujo",
+        "usuario": "Matheus",
+        "email": "Matheus.Silva@gmail.com",
+        "telefone": "(11) 11111-1111",
+        "data_nascimento": "20/02/2000",
+        "cpf": "123.456.789-10",
+        "cep": "10000-100",
+        "senha": "Matheus123!",
+        "id": 1
+    },
+    {
+        "nome": "Matheus Araujo",
+        "usuario": "Matheus",
+        "email": "Matheus@gmail.com",
+        "telefone": "(10) 00000-0000",
+        "data_nascimento": "20/02/2002",
+        "cpf": "123.456.789-10",
+        "cep": "10000-100",
+        "senha": "Matheus123.",
+        "id": 2
+    },
+    {
+        "nome": "Matheusaaaaa",
+        "usuario": "Matheusaaaaa",
+        "email": "Matheus.silva@gmail.com",
+        "telefone": "(12) 34567-8910",
+        "data_nascimento": "20/02/2002",
+        "cpf": "123.456.789-10",
+        "cep": "10000-100",
+        "senha": "Matheus1.",
+        "id": 3
+    },
+    {
+        "nome": "Gerente Teste",
+        "usuario": "Teste",
+        "email": "Teste@gmail.com",
+        "telefone": "(11) 11111-1111",
+        "data_nascimento": "01/01/2001",
+        "cpf": "123.456.789-10",
+        "cep": "10000-100",
+        "senha": "Gerente.1",
+        "cargo": "Gerente",
+        "id": 4
+    }
+]
