@@ -3,7 +3,7 @@ import customtkinter as ctk
 import json
 import os
 import tkinter.messagebox as mbox
-import subprocess
+import hashlib, base64
 
 # Configuração - aparência
 ctk.set_appearance_mode("dark")
@@ -31,36 +31,61 @@ def verificar_login():
 
     # Carrega usuários
     with open(caminho_usuarios, "r", encoding="utf-8") as f:
-        usuarios = json.load(f)
-
-    for u in usuarios:
-        if u["usuario"] == usuario and u["senha"] == senha:
-            mbox.showinfo("Sucesso", f"Bem-vindo, {u['nome']}!")
-
-            from datetime import datetime
-            hora_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-
-            with open(caminho_acessos, "r", encoding="utf-8") as arq:
-                acessos = json.load(arq)
-
-            registro = {
-                "usuario": u["usuario"],
-                "nome": u["nome"],
-                "cargo": u.get("cargo", "Não informado"),
-                "data_hora": hora_atual
-            }
-
-            acessos.append(registro)
-
-            with open(caminho_acessos, "w", encoding="utf-8") as arq:
-                json.dump(acessos, arq, indent=4, ensure_ascii=False)
-
-            # Fecha o login e abre a tela principal
-            app.destroy()
-            from Main import abrir_main
-            abrir_main(u)
+        try:
+            usuarios = json.load(f)
+        except json.JSONDecodeError:
+            mbox.showerror("Erro", "Arquivo de usuários corrompido!")
             return
 
+    # Verificação segura com hash
+    for u in usuarios:
+        if u["usuario"] == usuario:
+            try:
+                salt = base64.b64decode(u["salt"])
+                hash_armazenado = u["senha_hash"]
+
+                # Gera o hash da senha digitada usando o mesmo salt
+                hash_digitado = hashlib.pbkdf2_hmac(
+                    "sha256", senha.encode("utf-8"), salt, 100000
+                )
+                hash_digitado_b64 = base64.b64encode(hash_digitado).decode("utf-8")
+
+                # Compara o hash armazenado com o gerado
+                if hash_digitado_b64 == hash_armazenado:
+                    mbox.showinfo("Sucesso", f"Bem-vindo, {u['nome']}!")
+
+                    from datetime import datetime
+                    hora_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+                    # Garante que o arquivo Acesso.json existe
+                    if not os.path.exists(caminho_acessos):
+                        with open(caminho_acessos, "w", encoding="utf-8") as arq:
+                            json.dump([], arq)
+
+                    with open(caminho_acessos, "r", encoding="utf-8") as arq:
+                        acessos = json.load(arq)
+
+                    registro = {
+                        "usuario": u["usuario"],
+                        "nome": u["nome"],
+                        "cargo": u.get("cargo", "Não informado"),
+                        "data_hora": hora_atual
+                    }
+
+                    acessos.append(registro)
+
+                    with open(caminho_acessos, "w", encoding="utf-8") as arq:
+                        json.dump(acessos, arq, indent=4, ensure_ascii=False)
+
+                    # Fecha o login e abre o sistema principal
+                    app.destroy()
+                    from Main import abrir_main
+                    abrir_main(u)
+                    return
+            except KeyError:
+                continue
+
+    # Se não encontrou ou senha errada
     mbox.showerror("Erro", "Usuário ou senha incorretos!")
 
 # Label - Bem-vindo

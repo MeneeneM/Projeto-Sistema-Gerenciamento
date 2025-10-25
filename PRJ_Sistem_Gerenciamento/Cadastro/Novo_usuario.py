@@ -3,6 +3,9 @@ import Cadastro.Formatacao as Formatacao
 import customtkinter as ctk
 import re
 import tkinter.messagebox as mbox
+import hashlib
+import os
+import base64
 
 def janela_cadastro(app):
 
@@ -11,12 +14,29 @@ def janela_cadastro(app):
     janela_cadastro.geometry("1050x600")
     janela_cadastro.grab_set()
 
+    # Função para gerar hash seguro com salt
+    def gerar_hash_senha(senha):
+        salt = os.urandom(16)  # 16 bytes de salt aleatório
+        hash_senha = hashlib.pbkdf2_hmac(
+            "sha256", senha.encode("utf-8"), salt, 100000
+        )
+        # Retorna o salt e o hash codificados em base64 para salvar em JSON
+        return base64.b64encode(salt).decode("utf-8"), base64.b64encode(hash_senha).decode("utf-8")
+
     # Função salvar Json
     def salvar_json(dados):
         caminho = "Cadastro_Usuario.json"
 
+        # Garante que o arquivo existe
+        if not os.path.exists(caminho):
+            with open(caminho, "w", encoding="utf-8") as f:
+                json.dump([], f)
+
         with open(caminho, "r", encoding="utf-8") as arquivo:
-            usuarios = json.load(arquivo)
+            try:
+                usuarios = json.load(arquivo)
+            except json.JSONDecodeError:
+                usuarios = []
 
         if usuarios:
             ultimo_id = max(int(u.get("id", 0)) for u in usuarios)
@@ -81,6 +101,9 @@ def janela_cadastro(app):
             mbox.showerror("Erro", Formatacao.mensagem_senha(senha))
             return
 
+        # 🔒 Criptografa a senha com salt
+        salt, hash_senha = gerar_hash_senha(senha)
+
         # Dados do usuário
         dados_usuario = {
             "nome": nome,
@@ -90,7 +113,8 @@ def janela_cadastro(app):
             "data_nascimento": nascimento,
             "cpf": cpf,
             "cep": cep,
-            "senha": senha,
+            "senha_hash": hash_senha,
+            "salt": salt,
             "cargo": cargo
         }
 
@@ -98,7 +122,7 @@ def janela_cadastro(app):
         mbox.showinfo("Sucesso", f"Usuário {usuario} cadastrado com sucesso!")
         janela_cadastro.destroy()
 
-    # Layout
+    # Layout (mantém igual ao seu)
     for i in range(4):
         janela_cadastro.columnconfigure(i, weight=1)
 
