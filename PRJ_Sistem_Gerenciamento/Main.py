@@ -1,174 +1,168 @@
 import customtkinter as ctk
-import tkinter as tk
 import json
 import os
-import tkinter.messagebox as mbox
 from Cadastro.Novo_usuario import janela_cadastro
 from Alterar_Cadastro import janela_gerenciar
+from Cadastro.Historico_Acessos import janela_historico_acessos
+from Sobre import abrir_sobre
+import datetime
 
 # Configurações gerais
 ctk.set_appearance_mode("dark")
 
 # Interface principal
 app = ctk.CTk()
-app.title("Sistema de Gerenciamento - Histórico de Acessos")
-app.geometry("1050x600")
+app.title("Sistema de Gerenciamento")
+app.geometry("900x600")
 
-ACESSOS = "Acesso.json"
+def desativar_botao_fechar():
+    pass
 
-# Funções 
-def carregar_acessos():
-    if not os.path.exists(ACESSOS):
-        with open(ACESSOS, "w", encoding="utf-8") as f:
-            json.dump([], f)
+app.protocol("WM_DELETE_WINDOW", desativar_botao_fechar)
 
-    # garante conteúdo inicial
-    if os.path.getsize(ACESSOS) == 0:
-        with open(ACESSOS, "w", encoding="utf-8") as f:
-            json.dump([], f)
-
-    with open(ACESSOS, "r", encoding="utf-8") as f:
-        try:
-            return json.load(f)
-        except json.JSONDecodeError:
-            return []
-
-def atualizar_tabela():
-    # limpa conteúdo do frame_tabela
-    for widget in frame_tabela.winfo_children():
-        widget.destroy()
-
-    acessos = carregar_acessos()
-
-    if not acessos:
-        vazio = ctk.CTkLabel(frame_tabela, text="Nenhum acesso registrado ainda.", font=("Arial", 14), text_color="gray")
-        vazio.pack(pady=20)
-        # atualiza scrollregion
-        frame_tabela.update_idletasks()
-        canvas.configure(scrollregion=canvas.bbox("all"))
-        return
-
-    # Cabeçalhos da tabela
-    cabecalhos = ["Usuário", "Nome", "Cargo", "Data e Hora"]
-    for i, texto in enumerate(cabecalhos):
-        lbl = ctk.CTkLabel(frame_tabela, text=texto, font=("Arial", 16, "bold"), text_color="lightblue")
-        lbl.grid(row=0, column=i, padx=20, pady=10, sticky="w")
-
-    # Linhas da tabela
-    for linha, acesso in enumerate(acessos, start=1):
-        ctk.CTkLabel(frame_tabela, text=acesso.get("usuario", ""), font=("Arial", 14)).grid(row=linha, column=0, sticky="w", padx=20, pady=5)
-        ctk.CTkLabel(frame_tabela, text=acesso.get("nome", ""), font=("Arial", 14)).grid(row=linha, column=1, sticky="w", padx=20, pady=5)
-        ctk.CTkLabel(frame_tabela, text=acesso.get("cargo", ""), font=("Arial", 14)).grid(row=linha, column=2, sticky="w", padx=20, pady=5)
-        ctk.CTkLabel(frame_tabela, text=acesso.get("data_hora", ""), font=("Arial", 14)).grid(row=linha, column=3, sticky="w", padx=20, pady=5)
-
-    # Ajusta e atualiza área de rolagem
-    frame_tabela.update_idletasks()
-    canvas.configure(scrollregion=canvas.bbox("all"))
-
-def limpar_historico():
-    resposta = mbox.askyesno("Confirmação", "Tem certeza que deseja apagar o histórico de acessos?")
-    if resposta:
-        with open(ACESSOS, "w", encoding="utf-8") as arquivo:
-            json.dump([], arquivo)
-        atualizar_tabela()
-        mbox.showinfo("Sucesso", "Histórico apagado com sucesso!")
-
-# Ultimo acesso 
-cargo_usuario = ""
-if os.path.exists(ACESSOS) and os.path.getsize(ACESSOS) > 0:
-    with open(ACESSOS, "r", encoding="utf-8") as arquivo:
-        try:
-            dados_acesso = json.load(arquivo)
-            if isinstance(dados_acesso, list) and len(dados_acesso) > 0:
-                ultimo_acesso = dados_acesso[-1]
-                cargo_usuario = ultimo_acesso.get("cargo", "")
-            elif isinstance(dados_acesso, dict):
-                cargo_usuario = dados_acesso.get("cargo", "")
-        except json.JSONDecodeError:
-            cargo_usuario = ""
-else:
-    cargo_usuario = ""
+# Funções auxiliares
+def carregar_ultimo_usuario():
+    if os.path.exists("Acesso.json") and os.path.getsize("Acesso.json") > 0:
+        with open("Acesso.json", "r", encoding="utf-8") as arquivo:
+            dados = json.load(arquivo)
+            if isinstance(dados, list) and len(dados) > 0:
+                return dados[-1]
+    return {"usuario": "Desconhecido", "nome": "Usuário", "cargo": ""}
 
 def tem_permissao(cargo):
     cargos_permitidos = ["Gerente", "Gestão", "Operador de T.I"]
     return cargo in cargos_permitidos
 
-# Scrollable table
-frame_tabela_container = ctk.CTkFrame(app)
-frame_tabela_container.pack(pady=10, fill="both", expand=True)
+# Usuário logado
+usuario_logado = carregar_ultimo_usuario()
+cargo_usuario = usuario_logado.get("cargo", "")
 
-canvas = tk.Canvas(frame_tabela_container, bg="#2b2b2b", highlightthickness=0)
-canvas.pack(side="left", fill="both", expand=True)
+# Funções do ComboBox
+def menu_selecionado(opcao):
+    if opcao == "Sobre":
+        abrir_sobre()
+    elif opcao == "Sair":
+        sair_sistema()
+        app.destroy()
 
-scrollbar = ctk.CTkScrollbar(frame_tabela_container, orientation="vertical", command=lambda *args: (canvas.yview(*args)))
-scrollbar.pack(side="right", fill="y")
+def registrar_saida(usuario):
+    if not os.path.exists("Acesso.json"):
+        return
 
-canvas.configure(yscrollcommand=scrollbar.set)
+    with open("Acesso.json", "r", encoding="utf-8") as arquivo:
+        acessos = json.load(arquivo)
 
-frame_tabela = ctk.CTkFrame(canvas)
-frame_tabela_id = canvas.create_window((0, 0), window=frame_tabela, anchor="nw")
+    for acesso in reversed(acessos):
+        if acesso.get("usuario") == usuario.get("usuario"):
+            acesso["data_hora_saida"] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            break
 
-def atualizar_scroll(event=None):
-    canvas.configure(scrollregion=canvas.bbox("all"))
-frame_tabela.bind("<Configure>", atualizar_scroll)
+    with open("Acesso.json", "w", encoding="utf-8") as arquivo:
+        json.dump(acessos, arquivo, indent=4, ensure_ascii=False)
 
-def ajustar_largura(event):
-    canvas.itemconfigure(frame_tabela_id, width=event.width)
-canvas.bind("<Configure>", ajustar_largura)
+def sair_sistema():
+    registrar_saida(usuario_logado)
+    app.destroy()
 
-# Botões
+# Layout principal usando grid
+app.grid_rowconfigure(0, weight=0)  # Linha do menu
+app.grid_rowconfigure(1, weight=0)  # Saudação
+app.grid_rowconfigure(2, weight=0)  # Mensagem de boas-vindas
+app.grid_rowconfigure(3, weight=1)  # Espaço expansível
+app.grid_rowconfigure(4, weight=0)  # Linha dos botões
+app.grid_rowconfigure(5, weight=0)  # Linha do rodapé
+app.grid_columnconfigure(0, weight=1)
+
+# ComboBox de funções no topo
+menu_funcoes = ctk.CTkOptionMenu(
+    app,
+    values=["Selecione", "Sobre", "Sair"],
+    command=menu_selecionado,
+    width=50,
+    height=15,
+    fg_color="#2b2b2b",
+    button_color="#3a3a3a",
+    button_hover_color="#505050",
+    text_color="white"
+)
+menu_funcoes.set("Selecione")
+menu_funcoes.grid(row=0, column=0, padx=(0,800))
+
+# Saudação central
+saudacao = ctk.CTkLabel(
+    app,
+    text=f"Olá, {usuario_logado.get('nome', 'Usuário')}",
+    font=("Arial", 20, "bold"),
+    text_color="gray"
+)
+saudacao.grid(row=1, column=0, pady=(10, 5))
+
+# Mensagem de boas-vindas
+mensagem_boas_vindas = ctk.CTkLabel(
+    app,
+    text="Bem-vindo ao sistema de gerenciamento",
+    font=("Arial", 16),
+    text_color="darkgray"
+)
+mensagem_boas_vindas.grid(row=2, column=0, pady=(0, 20))
+
+# Frame de botões
 frame_botoes = ctk.CTkFrame(app)
-frame_botoes.pack(fill="x", pady=10)
+frame_botoes.grid(row=4, column=0, pady=20)
 
-# Atualizar
-ctk.CTkButton(
-    frame_botoes, 
-    text="Atualizar", 
-    font=("Arial", 14), 
-    width=150, 
-    command=atualizar_tabela).pack(side="left", padx=30, pady=10)
-
-# Limpar
-ctk.CTkButton(
-    frame_botoes, 
-    text="Limpar Histórico", 
-    font=("Arial", 14), 
-    width=150, 
-    fg_color="red", 
-    hover_color="#a30000", 
-    command=limpar_historico).pack(side="left", padx=10, pady=10)
-
-# Permissões: Gerenciar
+# Botões de ação
 if tem_permissao(cargo_usuario):
     ctk.CTkButton(
-        frame_botoes, 
-        text="Cadastrar Usuário", 
-        font=("Arial", 14), 
-        width=150, 
-        command=lambda: janela_cadastro(app)).pack(side="left", padx=10, pady=10)
+        frame_botoes,
+        text="Cadastrar Usuário",
+        font=("Arial", 14),
+        width=180,
+        height=40,
+        command=lambda: janela_cadastro(app)
+    ).grid(row=0, column=0, padx=10, pady=10)
 
-    ctk.CTkButton(frame_botoes, 
-        text="Gerenciar Usuários", 
-        font=("Arial", 14), 
-        width=200, 
-        command=lambda: janela_gerenciar(cargo_usuario)).pack(side="left", padx=10, pady=10)
-
+    ctk.CTkButton(
+        frame_botoes,
+        text="Gerenciar Usuários",
+        font=("Arial", 14),
+        width=180,
+        height=40,
+        command=lambda: janela_gerenciar(cargo_usuario)
+    ).grid(row=0, column=1, padx=10, pady=10)
 else:
     aviso = ctk.CTkLabel(
-        app, 
-        text="Acesso restrito: apenas Gerente, Gestão e Operador de T.I podem cadastrar ou gerenciar usuários.", 
-        text_color="red", 
-        font=("Arial", 14))
-    aviso.pack(pady=10)
+        frame_botoes,
+        text="Acesso restrito: apenas Gerente, Gestão e Operador de T.I podem gerenciar usuários.",
+        text_color="red",
+        font=("Arial", 13)
+    )
+    aviso.grid(row=1, column=0, columnspan=5, pady=10)
+
+ctk.CTkButton(
+    frame_botoes,
+    text="Histórico de Acessos",
+    font=("Arial", 14),
+    width=180,
+    height=40,
+    command=lambda: janela_historico_acessos(usuario_logado)
+).grid(row=0, column=2, padx=10, pady=10)
+
+ctk.CTkButton(
+    frame_botoes,
+    text="Sair",
+    font=("Arial", 14),
+    width=180,
+    height=40,
+    command=sair_sistema
+).grid(row=0, column=3, padx=10, pady=10)
 
 # Rodapé
 rodape = ctk.CTkLabel(
-    app, 
-    text="──────────  © 2025 Sistema de Gerenciamento  ──────────", 
-    font=("Arial", 12, "italic"), 
-    text_color="gray70")
-rodape.pack(side="bottom", pady=10)
+    app,
+    text="──────────  © 2025 Sistema de Gerenciamento  ──────────",
+    font=("Arial", 12, "italic"),
+    text_color="gray70"
+)
+rodape.grid(row=5, column=0, pady=10)
 
-# Inicializa tabela
-atualizar_tabela()
 app.mainloop()

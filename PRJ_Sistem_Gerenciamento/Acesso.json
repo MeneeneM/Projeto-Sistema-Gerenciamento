@@ -4,5 +4,69 @@
         "nome": "Teste",
         "cargo": "Gerente",
         "data_hora": "25/10/2025 11:06:53"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "02/11/2025 14:59:13"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "02/11/2025 15:22:30"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "02/11/2025 15:29:08"
+    },
+    {
+        "usuario": "estagiario",
+        "nome": "Teste_Estagiario",
+        "cargo": "Estagiário",
+        "data_hora": "02/11/2025 15:49:59"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "02/11/2025 16:22:20"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "04/11/2025 11:10:18"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "04/11/2025 11:26:08",
+        "data_hora_saida": "04/11/2025 11:26:22"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "04/11/2025 11:28:33",
+        "data_hora_saida": "04/11/2025 11:35:17"
+    },
+    {
+        "usuario": "teste",
+        "nome": "Teste",
+        "cargo": "Gerente",
+        "data_hora": "04/11/2025 11:37:48",
+        "data_hora_saida": "04/11/2025 11:39:36"
+    },
+    {
+        "usuario": "usuario",
+        "nome": "usuario",
+        "cargo": "Gestão",
+        "data_hora": "04/11/2025 11:39:50",
+        "data_hora_saida": "04/11/2025 11:40:13"
     }
 ]

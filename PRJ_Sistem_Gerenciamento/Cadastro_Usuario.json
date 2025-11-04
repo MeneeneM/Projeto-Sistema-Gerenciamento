@@ -21,5 +21,31 @@
         "salt": "4tCYdPAhD6TLDFuKA6+dYA==",
         "cargo": "Gerente",
         "id": 1
+    },
+    {
+        "nome": "Teste_Estagiario",
+        "usuario": "estagiario",
+        "email": "estagiario@gmail.com",
+        "telefone": "(12) 34567-8910",
+        "data_nascimento": "01/01/0101",
+        "cpf": "121.345.678-91",
+        "cep": "10001-000",
+        "senha_hash": "WYimQjk9TT+XYlqpRV68341ZncW4CRedWJyWqyPUi50=",
+        "salt": "M9PPAPMkM/q5gPEbLrFX9A==",
+        "cargo": "Estagiário",
+        "id": 2
+    },
+    {
+        "nome": "usuario",
+        "usuario": "usuario",
+        "email": "usuario@gmail.com",
+        "telefone": "(90) 10009-0090",
+        "data_nascimento": "01/01/2001",
+        "cpf": "122.343.831-23",
+        "cep": "10000-100",
+        "senha_hash": "fRjGiaRKvj+mooTvBuYksmglbD84mmtbdqoPNX71Jao=",
+        "salt": "gE0i381wMrYaO/NR4TZMLg==",
+        "cargo": "Gestão",
+        "id": 3
     }
 ]
